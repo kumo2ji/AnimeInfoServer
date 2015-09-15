@@ -41,12 +41,6 @@ public class AnimeInfoApi {
     return new BooleanResponse(true);
   }
 
-  @ApiMethod(name = "delete.anime", path = "delete/anime", httpMethod = HttpMethod.POST)
-  public BooleanResponse deleteAnimeInfo(final IdRequest request) {
-    DatastoreUtils.deleteAnimeInfos(request.getIds());
-    return new BooleanResponse(true);
-  }
-
   @ApiMethod(name = "auth.delete.cours.all", path = "delete/cours/all", httpMethod = HttpMethod.GET,
       scopes = {ApiConstants.EMAIL_SCOPE}, clientIds = {ApiConstants.WEB_CLIENT_ID})
   public BooleanResponse deleteCoursObject() {
@@ -123,6 +117,31 @@ public class AnimeInfoApi {
     return builder.build();
   }
 
+  @ApiMethod(path = "put/anime", name = "put.anime", httpMethod = HttpMethod.POST)
+  public CollectionResponse<AnimeInfoBean> putAnimeInfoBeans(final PostAnimeInfoRequest request) {
+    final List<Key> keys = DatastoreUtils.putAnimeInfoBeans(request.getBeans());
+    final Map<Key, Entity> map = DatastoreUtils.queryAnimeInfoBean(keys);
+    final Collection<AnimeInfoBean> putBeans = CollectionUtils.collect(map.values(),
+        animeEntityInfo.getEntityToAnimeInfoBeanTransformer());
+    final Builder<AnimeInfoBean> builder = CollectionResponse.<AnimeInfoBean>builder();
+    builder.setItems(putBeans);
+    return builder.build();
+  }
+
+  @ApiMethod(name = "delete.anime", path = "delete/anime", httpMethod = HttpMethod.POST)
+  public BooleanResponse deleteAnimeInfo(final IdRequest request) {
+    DatastoreUtils.deleteAnimeInfos(request.getIds());
+    return new BooleanResponse(true);
+  }
+
+  @ApiMethod(path = "get/cours", name = "get.cours")
+  public Collection<CoursObject> getCoursObjects() {
+    final CoursEntityInfo entityInfo = new CoursEntityInfo();
+    final PreparedQuery preparedQuery = DatastoreUtils.queryCoursObject();
+    return CollectionUtils.collect(preparedQuery.asIterable(),
+        entityInfo.getEntityToCoursObjectTransformer());
+  }
+
   private FetchOptions createFetchOptions(final int limit, final String cursorString) {
     final FetchOptions options = FetchOptions.Builder.withDefaults();
     if (limit > 0) {
@@ -153,24 +172,5 @@ public class AnimeInfoApi {
       }
     }
     return DatastoreUtils.queryAnimeInfoBeans();
-  }
-
-  @ApiMethod(path = "put/anime", name = "put.anime", httpMethod = HttpMethod.POST)
-  public CollectionResponse<AnimeInfoBean> putAnimeInfoBeans(final PostAnimeInfoRequest request) {
-    final List<Key> keys = DatastoreUtils.putAnimeInfoBeans(request.getBeans());
-    final Map<Key, Entity> map = DatastoreUtils.queryAnimeInfoBean(keys);
-    final Collection<AnimeInfoBean> putBeans = CollectionUtils.collect(map.values(),
-        animeEntityInfo.getEntityToAnimeInfoBeanTransformer());
-    final Builder<AnimeInfoBean> builder = CollectionResponse.<AnimeInfoBean>builder();
-    builder.setItems(putBeans);
-    return builder.build();
-  }
-
-  @ApiMethod(path = "get/cours/all", name = "get.cours.all")
-  public Collection<CoursObject> getCoursObjects() {
-    final CoursEntityInfo entityInfo = new CoursEntityInfo();
-    final PreparedQuery preparedQuery = DatastoreUtils.queryCoursObject();
-    return CollectionUtils.collect(preparedQuery.asIterable(),
-        entityInfo.getEntityToCoursObjectTransformer());
   }
 }

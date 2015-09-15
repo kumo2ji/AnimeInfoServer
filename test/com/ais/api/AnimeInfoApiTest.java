@@ -124,7 +124,9 @@ public class AnimeInfoApiTest {
       assertThat(bean.getId(), is(entity.getKey().getId()));
       assertTrue(StringUtils.isNotEmpty(bean.getTitle()));
       assertTrue(StringUtils.isNotEmpty(bean.getTwitterAccount()));
-      assertTrue(StringUtils.isNotEmpty(bean.getTwitterHashTag()));
+      for (final String hashTag : bean.getTwitterHashTags()) {
+        assertTrue(StringUtils.isNotEmpty(hashTag));
+      }
       for (final String shortTitle : bean.getShortTitles()) {
         assertTrue(StringUtils.isNotEmpty(shortTitle));
       }
@@ -153,7 +155,9 @@ public class AnimeInfoApiTest {
         assertThat(coursObject, is(current));
         assertTrue(StringUtils.isNotEmpty(bean.getTitle()));
         assertTrue(StringUtils.isNotEmpty(bean.getTwitterAccount()));
-        assertTrue(StringUtils.isNotEmpty(bean.getTwitterHashTag()));
+        for (final String hashTag : bean.getTwitterHashTags()) {
+          assertTrue(StringUtils.isNotEmpty(hashTag));
+        }
         for (final String shortTitle : bean.getShortTitles()) {
           assertTrue(StringUtils.isNotEmpty(shortTitle));
         }
@@ -179,7 +183,9 @@ public class AnimeInfoApiTest {
     for (final AnimeInfoBean bean : beans) {
       assertTrue(StringUtils.isNotEmpty(bean.getTitle()));
       assertTrue(StringUtils.isNotEmpty(bean.getTwitterAccount()));
-      assertTrue(StringUtils.isNotEmpty(bean.getTwitterHashTag()));
+      for (final String hashTag : bean.getTwitterHashTags()) {
+        assertTrue(StringUtils.isNotEmpty(hashTag));
+      }
       final CoursObject coursObject = bean.getCoursObject();
       assertTrue(2000 < coursObject.getYear() && coursObject.getYear() < 3000);
       assertTrue(0 < coursObject.getCours() && coursObject.getCours() < 5);
@@ -205,7 +211,9 @@ public class AnimeInfoApiTest {
         for (final AnimeInfoBean bean : animeInfoBeans) {
           assertTrue(StringUtils.isNotEmpty(bean.getTitle()));
           assertTrue(StringUtils.isNotEmpty(bean.getTwitterAccount()));
-          assertTrue(StringUtils.isNotEmpty(bean.getTwitterHashTag()));
+          for (final String hashTag : bean.getTwitterHashTags()) {
+            assertTrue(StringUtils.isNotEmpty(hashTag));
+          }
           final CoursObject storedCoursObject = bean.getCoursObject();
           assertThat(storedCoursObject, is(coursObject));
           for (final String shortTitle : bean.getShortTitles()) {
@@ -242,7 +250,9 @@ public class AnimeInfoApiTest {
         for (final AnimeInfoBean bean : animeInfoBeans) {
           assertTrue(StringUtils.isNotEmpty(bean.getTitle()));
           assertTrue(StringUtils.isNotEmpty(bean.getTwitterAccount()));
-          assertTrue(StringUtils.isNotEmpty(bean.getTwitterHashTag()));
+          for (final String hashTag : bean.getTwitterHashTags()) {
+            assertTrue(StringUtils.isNotEmpty(hashTag));
+          }
           final CoursObject storedCoursObject = bean.getCoursObject();
           assertThat(storedCoursObject.getYear(), is(year));
           assertTrue(0 < storedCoursObject.getCours() && storedCoursObject.getCours() < 5);
@@ -271,7 +281,9 @@ public class AnimeInfoApiTest {
         for (final AnimeInfoBean bean : animeInfoBeans) {
           assertTrue(StringUtils.isNotEmpty(bean.getTitle()));
           assertTrue(StringUtils.isNotEmpty(bean.getTwitterAccount()));
-          assertTrue(StringUtils.isNotEmpty(bean.getTwitterHashTag()));
+          for (final String hashTag : bean.getTwitterHashTags()) {
+            assertTrue(StringUtils.isNotEmpty(hashTag));
+          }
           final CoursObject storedCoursObject = bean.getCoursObject();
           assertThat(storedCoursObject, is(coursObject));
           for (final String shortTitle : bean.getShortTitles()) {

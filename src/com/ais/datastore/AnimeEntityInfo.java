@@ -24,7 +24,7 @@ public class AnimeEntityInfo {
   public static final String SHORT_TITLES_PROPERTY_NAME = "shortTitles";
   public static final String PUBLIC_URL_PROPERTY_NAME = "publicUrl";
   public static final String TWITTER_ACCOUNT_PROPERTY_NAME = "twitterAccount";
-  public static final String TWITTER_HASH_TAG_PROPERTY_NAME = "twitterHashTag";
+  public static final String TWITTER_HASH_TAGS_PROPERTY_NAME = "twitterHashTags";
   public static final String COURS_KEY_PROPERTY_NAME = "coursKey";
   public static final String SEQUAL_PROPERTY_NAME = "sequel";
   public static final String SEX_PROPERTY_NAME = "sex";
@@ -41,21 +41,25 @@ public class AnimeEntityInfo {
         entity.setProperty(PUBLIC_URL_PROPERTY_NAME, input.getPublic_url());
         entity.setProperty(SEQUAL_PROPERTY_NAME, input.getSequel());
         entity.setProperty(SEX_PROPERTY_NAME, input.getSex());
-        final List<String> shortTitleList = Arrays.asList(input.getTitle_short1(),
+        final Collection<String> shortTitles = createCollection(input.getTitle_short1(),
             input.getTitle_short2(), input.getTitle_short3());
-        final Collection<String> shortTitles =
-            CollectionUtils.select(shortTitleList, new Predicate<String>() {
-          @Override
-          public boolean evaluate(final String arg0) {
-            return StringUtils.isNotEmpty(arg0);
-          }
-        });
         entity.setProperty(SHORT_TITLES_PROPERTY_NAME, shortTitles);
         entity.setProperty(TWITTER_ACCOUNT_PROPERTY_NAME, input.getTwitter_account());
-        entity.setProperty(TWITTER_HASH_TAG_PROPERTY_NAME, input.getTwitter_hash_tag());
+        final Collection<String> hashTags = createCollection(input.getTwitter_hash_tag());
+        entity.setProperty(TWITTER_HASH_TAGS_PROPERTY_NAME, hashTags);
         return entity;
       }
     };
+  }
+
+  private Collection<String> createCollection(final String... values) {
+    final List<String> list = Arrays.asList(values);
+    return CollectionUtils.select(list, new Predicate<String>() {
+      @Override
+      public boolean evaluate(final String arg0) {
+        return StringUtils.isNotEmpty(arg0);
+      }
+    });
   }
 
   public Transformer<AnimeInfoBean, Entity> getAnimeInfoBeanToEntityTransformer() {
@@ -81,7 +85,7 @@ public class AnimeEntityInfo {
         entity.setProperty(SEX_PROPERTY_NAME, input.getSex());
         entity.setProperty(SHORT_TITLES_PROPERTY_NAME, input.getShortTitles());
         entity.setProperty(TWITTER_ACCOUNT_PROPERTY_NAME, input.getTwitterAccount());
-        entity.setProperty(TWITTER_HASH_TAG_PROPERTY_NAME, input.getTwitterHashTag());
+        entity.setProperty(TWITTER_HASH_TAGS_PROPERTY_NAME, input.getTwitterHashTags());
         return entity;
       }
     };
@@ -106,7 +110,8 @@ public class AnimeEntityInfo {
         bean.setShortTitles(shortTitles);
         bean.setPublicUrl((String) input.getProperty(PUBLIC_URL_PROPERTY_NAME));
         bean.setTwitterAccount((String) input.getProperty(TWITTER_ACCOUNT_PROPERTY_NAME));
-        bean.setTwitterHashTag((String) input.getProperty(TWITTER_HASH_TAG_PROPERTY_NAME));
+        bean.setTwitterHashTags(
+            (Collection<String>) input.getProperty(TWITTER_HASH_TAGS_PROPERTY_NAME));
         try {
           final Key key = (Key) input.getProperty(COURS_KEY_PROPERTY_NAME);
           final Entity coursEntity = DatastoreUtils.getEntity(key);
