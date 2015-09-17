@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.apache.commons.collections4.Transformer;
 
-import com.ais.api.CoursObject;
 import com.ais.utils.JsonUtils;
 
 

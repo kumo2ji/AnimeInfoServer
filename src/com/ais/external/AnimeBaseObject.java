@@ -14,6 +14,8 @@ public final class AnimeBaseObject {
   private String updated_at;
   private long sex;
   private long sequel;
+  private CoursObject coursObject;
+  private long periodId;
 
   public AnimeBaseObject() {
     super();
@@ -71,12 +73,29 @@ public final class AnimeBaseObject {
     return sequel;
   }
 
+  public CoursObject getCoursObject() {
+    return coursObject;
+  }
+
+  public void setCoursObject(final CoursObject coursObject) {
+    this.coursObject = coursObject;
+  }
+
+  public long getPeriodId() {
+    return periodId;
+  }
+
+  public void setPeriodId(final long periodId) {
+    this.periodId = periodId;
+  }
+
   @Override
   public String toString() {
     return "AnimeBaseObject [id=" + id + ", title=" + title + ", title_short1=" + title_short1
         + ", title_short2=" + title_short2 + ", title_short3=" + title_short3 + ", public_url="
         + public_url + ", twitter_account=" + twitter_account + ", twitter_hash_tag="
         + twitter_hash_tag + ", cours_id=" + cours_id + ", created_at=" + created_at
-        + ", updated_at=" + updated_at + ", sex=" + sex + ", sequel=" + sequel + "]";
+        + ", updated_at=" + updated_at + ", sex=" + sex + ", sequel=" + sequel + ", coursObject="
+        + coursObject + ", periodId=" + periodId + "]";
   }
 }

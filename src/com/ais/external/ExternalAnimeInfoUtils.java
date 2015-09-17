@@ -5,7 +5,8 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 
-import com.ais.api.CoursObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Transformer;
 
 
 public class ExternalAnimeInfoUtils {
@@ -31,9 +32,22 @@ public class ExternalAnimeInfoUtils {
     return requestAnimeBaseObjectsForUrl(server.getBaseObjectUrlString(year));
   }
 
-  public static Collection<AnimeBaseObject> requestAnimeBaseObjects(final String year,
-      final String cours) throws IOException {
-    return requestAnimeBaseObjectsForUrl(server.getBaseObjectUrlString(year, cours));
+  public static Collection<AnimeBaseObject> requestAnimeBaseObjects(final long year,
+      final long cours) throws IOException {
+    return CollectionUtils.collect(
+        requestAnimeBaseObjectsForUrl(
+            server.getBaseObjectUrlString(String.valueOf(year), String.valueOf(cours))),
+        new Transformer<AnimeBaseObject, AnimeBaseObject>() {
+          @Override
+          public AnimeBaseObject transform(final AnimeBaseObject arg0) {
+            final CoursObject coursObject = new CoursObject();
+            coursObject.setId(arg0.getCours_id());
+            coursObject.setYear(year);
+            coursObject.setCours(cours);
+            arg0.setCoursObject(coursObject);
+            return arg0;
+          }
+        });
   }
 
   private static Collection<AnimeBaseObject> requestAnimeBaseObjectsForUrl(final String urlString)

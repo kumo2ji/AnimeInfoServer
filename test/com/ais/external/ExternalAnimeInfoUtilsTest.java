@@ -1,5 +1,8 @@
 package com.ais.external;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -13,7 +16,6 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
-import com.ais.api.CoursObject;
 import com.ais.utils.Utils;
 
 
@@ -80,7 +82,7 @@ public class ExternalAnimeInfoUtilsTest {
   public void testRequestAnimeBaseObjectForCours() {
     try {
       final Collection<AnimeBaseObject> list =
-          ExternalAnimeInfoUtils.requestAnimeBaseObjects("2014", "1");
+          ExternalAnimeInfoUtils.requestAnimeBaseObjects(2014, 1);
       assertTrue(!list.isEmpty());
       for (final AnimeBaseObject animeBaseObject : list) {
         assertTrue(animeBaseObject.getId() > 0);
@@ -93,6 +95,7 @@ public class ExternalAnimeInfoUtilsTest {
         final String updatedAtString = animeBaseObject.getUpdated_at();
         assertTrue(!createdAtString.isEmpty());
         assertTrue(!updatedAtString.isEmpty());
+        assertThat(animeBaseObject.getCoursObject(), is(nullValue()));
       }
     } catch (final IOException e) {
       fail(e.getMessage());

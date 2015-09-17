@@ -11,7 +11,7 @@ public class AnimeInfoBean implements Serializable {
   private String publicUrl;
   private String twitterAccount;
   private Collection<String> twitterHashTags;
-  private CoursObject coursObject;
+  private long periodId;
   private long sex;
   private long sequel;
 
@@ -63,12 +63,12 @@ public class AnimeInfoBean implements Serializable {
     this.twitterHashTags = twitterHashTags;
   }
 
-  public CoursObject getCoursObject() {
-    return coursObject;
+  public long getPeriodId() {
+    return periodId;
   }
 
-  public void setCoursObject(final CoursObject coursObject) {
-    this.coursObject = coursObject;
+  public void setPeriodId(final long periodId) {
+    this.periodId = periodId;
   }
 
   public final long getSex() {
@@ -91,8 +91,7 @@ public class AnimeInfoBean implements Serializable {
   public String toString() {
     return "AnimeInfoBean [id=" + id + ", title=" + title + ", shortTitles=" + shortTitles
         + ", publicUrl=" + publicUrl + ", twitterAccount=" + twitterAccount + ", twitterHashTags="
-        + twitterHashTags + ", coursObject=" + coursObject + ", sex=" + sex + ", sequel=" + sequel
-        + "]";
+        + twitterHashTags + ", periodId=" + periodId + ", sex=" + sex + ", sequel=" + sequel + "]";
   }
 
 }

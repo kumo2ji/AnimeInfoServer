@@ -11,7 +11,6 @@ import org.apache.commons.collections4.Transformer;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ais.api.AnimeInfoBean;
-import com.ais.api.CoursObject;
 import com.ais.external.AnimeBaseObject;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
@@ -19,16 +18,15 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
 public class AnimeEntityInfo {
-  public static final String KIND_NAME = "AnimeBaseObject";
+  public static final String KIND_NAME = "AnimeInfo";
   public static final String TITLE_PROPERTY_NAME = "title";
   public static final String SHORT_TITLES_PROPERTY_NAME = "shortTitles";
   public static final String PUBLIC_URL_PROPERTY_NAME = "publicUrl";
   public static final String TWITTER_ACCOUNT_PROPERTY_NAME = "twitterAccount";
   public static final String TWITTER_HASH_TAGS_PROPERTY_NAME = "twitterHashTags";
-  public static final String COURS_KEY_PROPERTY_NAME = "coursKey";
+  public static final String PERIOD_KEY_PROPERTY_NAME = "periodKey";
   public static final String SEQUAL_PROPERTY_NAME = "sequel";
   public static final String SEX_PROPERTY_NAME = "sex";
-  private static final CoursEntityInfo coursInfo = new CoursEntityInfo();
 
   public Transformer<AnimeBaseObject, Entity> getAnimeBaseObjectToEntityTransformer() {
     return new Transformer<AnimeBaseObject, Entity>() {
@@ -36,8 +34,8 @@ public class AnimeEntityInfo {
       public Entity transform(final AnimeBaseObject input) {
         final Entity entity = new Entity(KIND_NAME);
         entity.setProperty(TITLE_PROPERTY_NAME, input.getTitle());
-        final Key key = KeyFactory.createKey(CoursEntityInfo.KIND_NAME, input.getCours_id());
-        entity.setProperty(COURS_KEY_PROPERTY_NAME, key);
+        final Key key = KeyFactory.createKey(PeriodEntityInfo.KIND_NAME, input.getPeriodId());
+        entity.setProperty(PERIOD_KEY_PROPERTY_NAME, key);
         entity.setProperty(PUBLIC_URL_PROPERTY_NAME, input.getPublic_url());
         entity.setProperty(SEQUAL_PROPERTY_NAME, input.getSequel());
         entity.setProperty(SEX_PROPERTY_NAME, input.getSex());
@@ -77,9 +75,8 @@ public class AnimeEntityInfo {
         }
 
         entity.setProperty(TITLE_PROPERTY_NAME, input.getTitle());
-        final CoursObject coursObject = input.getCoursObject();
-        final Key key = coursInfo.createKey(coursObject);
-        entity.setProperty(COURS_KEY_PROPERTY_NAME, key);
+        final Key key = KeyFactory.createKey(PeriodEntityInfo.KIND_NAME, input.getPeriodId());
+        entity.setProperty(PERIOD_KEY_PROPERTY_NAME, key);
         entity.setProperty(PUBLIC_URL_PROPERTY_NAME, input.getPublicUrl());
         entity.setProperty(SEQUAL_PROPERTY_NAME, input.getSequel());
         entity.setProperty(SEX_PROPERTY_NAME, input.getSex());
@@ -92,9 +89,6 @@ public class AnimeEntityInfo {
   }
 
   public Transformer<Entity, AnimeInfoBean> getEntityToAnimeInfoBeanTransformer() {
-    final CoursEntityInfo coursInfo = new CoursEntityInfo();
-    final Transformer<Entity, CoursObject> transformer =
-        coursInfo.getEntityToCoursObjectTransformer();
     return new Transformer<Entity, AnimeInfoBean>() {
       @SuppressWarnings("unchecked")
       @Override
@@ -112,13 +106,8 @@ public class AnimeEntityInfo {
         bean.setTwitterAccount((String) input.getProperty(TWITTER_ACCOUNT_PROPERTY_NAME));
         bean.setTwitterHashTags(
             (Collection<String>) input.getProperty(TWITTER_HASH_TAGS_PROPERTY_NAME));
-        try {
-          final Key key = (Key) input.getProperty(COURS_KEY_PROPERTY_NAME);
-          final Entity coursEntity = DatastoreUtils.getEntity(key);
-          bean.setCoursObject(transformer.transform(coursEntity));
-        } catch (final EntityNotFoundException e) {
-          e.printStackTrace();
-        }
+        final Key key = (Key) input.getProperty(PERIOD_KEY_PROPERTY_NAME);
+        bean.setPeriodId(key.getId());
         bean.setSequel((long) input.getProperty(SEQUAL_PROPERTY_NAME));
         bean.setSex((long) input.getProperty(SEX_PROPERTY_NAME));
         return bean;

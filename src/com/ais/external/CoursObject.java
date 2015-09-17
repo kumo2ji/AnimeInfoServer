@@ -1,4 +1,4 @@
-package com.ais.api;
+package com.ais.external;
 
 import java.io.Serializable;
 
@@ -15,7 +15,6 @@ public final class CoursObject implements Serializable {
   public void setId(final long id) {
     this.id = id;
   }
-
 
   public long getYear() {
     return year;

@@ -1,9 +1,14 @@
 package com.ais.api;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -24,13 +29,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.ais.datastore.AnimeDatastore;
 import com.ais.datastore.AnimeEntityInfo;
-import com.ais.datastore.DatastoreUtils;
+import com.ais.datastore.PeriodEntityInfo;
+import com.ais.external.CoursObject;
 import com.ais.external.ExternalAnimeInfoUtils;
 import com.google.api.server.spi.response.CollectionResponse;
 import com.google.api.server.spi.response.InternalServerErrorException;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -42,10 +54,12 @@ public class AnimeInfoApiTest {
 
   private static final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+  private static DatastoreService datastore;
 
   @Before
   public void setUp() throws Exception {
     helper.setUp();
+    datastore = DatastoreServiceFactory.getDatastoreService();
   }
 
   @After
@@ -96,10 +110,10 @@ public class AnimeInfoApiTest {
     try {
       final BooleanResponse connectResponse = api.connectExternalAndPutCurrent();
       assertTrue(connectResponse.getValue());
-      assertTrue(CollectionUtils.isNotEmpty(api.getCoursObjects()));
-      final BooleanResponse deleteResponse = api.deleteCoursObject();
+      assertTrue(CollectionUtils.isNotEmpty(api.getPeriodBeans()));
+      final BooleanResponse deleteResponse = api.deleteAllPeriod();
       assertTrue(deleteResponse.getValue());
-      assertTrue(CollectionUtils.isEmpty(api.getCoursObjects()));
+      assertTrue(CollectionUtils.isEmpty(api.getPeriodBeans()));
     } catch (final InternalServerErrorException e) {
       fail(e.getMessage());
     }
@@ -112,15 +126,19 @@ public class AnimeInfoApiTest {
     } catch (final InternalServerErrorException e) {
       fail(e.getMessage());
     }
-    final PreparedQuery pQuery = DatastoreUtils.queryAnimeInfoBeans();
+    final PreparedQuery pQuery = AnimeDatastore.query();
     assertTrue(pQuery.countEntities(FetchOptions.Builder.withDefaults()) > 0);
     for (final Entity entity : pQuery.asIterable()) {
       final Transformer<Entity, AnimeInfoBean> transformer =
           animeEntityInfo.getEntityToAnimeInfoBeanTransformer();
       final AnimeInfoBean bean = transformer.transform(entity);
-      final CoursObject coursObject = bean.getCoursObject();
-      assertTrue(2000 < coursObject.getYear() && coursObject.getYear() < 3000);
-      assertTrue(0 < coursObject.getCours() && coursObject.getCours() < 5);
+      try {
+        final Key key = KeyFactory.createKey(PeriodEntityInfo.KIND_NAME, bean.getPeriodId());
+        final Entity periodEntity = datastore.get(key);
+        assertThat(periodEntity.getProperties().keySet(), not(empty()));
+      } catch (final EntityNotFoundException e) {
+        fail(e.getMessage());
+      }
       assertThat(bean.getId(), is(entity.getKey().getId()));
       assertTrue(StringUtils.isNotEmpty(bean.getTitle()));
       assertTrue(StringUtils.isNotEmpty(bean.getTwitterAccount()));
@@ -144,15 +162,25 @@ public class AnimeInfoApiTest {
           return (int) (o1.getId() - o2.getId());
         }
       });
-      PreparedQuery pQuery = DatastoreUtils.queryAnimeInfoBeans();
+      PreparedQuery pQuery = AnimeDatastore.query();
       final int count = pQuery.countEntities(FetchOptions.Builder.withDefaults());
       assertThat(count, not(0));
       final Transformer<Entity, AnimeInfoBean> transformer =
           animeEntityInfo.getEntityToAnimeInfoBeanTransformer();
       for (final Entity entity : pQuery.asIterable()) {
         final AnimeInfoBean bean = transformer.transform(entity);
-        final CoursObject coursObject = bean.getCoursObject();
-        assertThat(coursObject, is(current));
+        try {
+          final Key key = KeyFactory.createKey(PeriodEntityInfo.KIND_NAME, bean.getPeriodId());
+          final Entity periodEntity = datastore.get(key);
+          assertThat(periodEntity.getProperties().keySet(), not(empty()));
+          final long year = (long) periodEntity.getProperty(PeriodEntityInfo.YEAR_PROPERTY_NAME);
+          final long season =
+              (long) periodEntity.getProperty(PeriodEntityInfo.SEASON_PROPERTY_NAME);
+          assertThat(year, is(current.getYear()));
+          assertThat(season, is(current.getCours()));
+        } catch (final EntityNotFoundException e) {
+          fail(e.getMessage());
+        }
         assertTrue(StringUtils.isNotEmpty(bean.getTitle()));
         assertTrue(StringUtils.isNotEmpty(bean.getTwitterAccount()));
         for (final String hashTag : bean.getTwitterHashTags()) {
@@ -163,7 +191,7 @@ public class AnimeInfoApiTest {
         }
       }
       api.connectExternalAndPutCurrent();
-      pQuery = DatastoreUtils.queryAnimeInfoBeans();
+      pQuery = AnimeDatastore.query();
       assertThat(pQuery.countEntities(FetchOptions.Builder.withDefaults()), is(count));
     } catch (final InternalServerErrorException | IOException e) {
       fail(e.getMessage());
@@ -186,9 +214,17 @@ public class AnimeInfoApiTest {
       for (final String hashTag : bean.getTwitterHashTags()) {
         assertTrue(StringUtils.isNotEmpty(hashTag));
       }
-      final CoursObject coursObject = bean.getCoursObject();
-      assertTrue(2000 < coursObject.getYear() && coursObject.getYear() < 3000);
-      assertTrue(0 < coursObject.getCours() && coursObject.getCours() < 5);
+      try {
+        final Key key = KeyFactory.createKey(PeriodEntityInfo.KIND_NAME, bean.getPeriodId());
+        final Entity periodEntity = datastore.get(key);
+        assertThat(periodEntity.getProperties().keySet(), not(empty()));
+        final long year = (long) periodEntity.getProperty(PeriodEntityInfo.YEAR_PROPERTY_NAME);
+        final long season = (long) periodEntity.getProperty(PeriodEntityInfo.SEASON_PROPERTY_NAME);
+        assertThat(year, allOf(greaterThan(2000L), lessThan(3000L)));
+        assertThat(season, allOf(greaterThan(0L), lessThan(5L)));
+      } catch (final EntityNotFoundException e) {
+        fail(e.getMessage());
+      }
       for (final String shortTitle : bean.getShortTitles()) {
         assertTrue(StringUtils.isNotEmpty(shortTitle));
       }
@@ -202,10 +238,10 @@ public class AnimeInfoApiTest {
       final Map<String, CoursObject> coursMap = ExternalAnimeInfoUtils.requestCoursObjectMap();
       for (final CoursObject coursObject : coursMap.values()) {
         final GetAnimeInfoRequest request = new GetAnimeInfoRequest();
-        final CoursObject requestCoursObject = new CoursObject();
-        requestCoursObject.setYear(coursObject.getYear());
-        requestCoursObject.setCours(coursObject.getCours());
-        request.setCoursObject(requestCoursObject);
+        final PeriodBean requestPeriod = new PeriodBean();
+        requestPeriod.setYear(coursObject.getYear());
+        requestPeriod.setSeason(coursObject.getCours());
+        request.setPeriodBean(requestPeriod);
         final Collection<AnimeInfoBean> animeInfoBeans = api.getAnimeInfoBeans(request).getItems();
         assertTrue(CollectionUtils.isNotEmpty(animeInfoBeans));
         for (final AnimeInfoBean bean : animeInfoBeans) {
@@ -214,8 +250,18 @@ public class AnimeInfoApiTest {
           for (final String hashTag : bean.getTwitterHashTags()) {
             assertTrue(StringUtils.isNotEmpty(hashTag));
           }
-          final CoursObject storedCoursObject = bean.getCoursObject();
-          assertThat(storedCoursObject, is(coursObject));
+          try {
+            final Key key = KeyFactory.createKey(PeriodEntityInfo.KIND_NAME, bean.getPeriodId());
+            final Entity periodEntity = datastore.get(key);
+            assertThat(periodEntity.getProperties().keySet(), not(empty()));
+            final long year = (long) periodEntity.getProperty(PeriodEntityInfo.YEAR_PROPERTY_NAME);
+            final long season =
+                (long) periodEntity.getProperty(PeriodEntityInfo.SEASON_PROPERTY_NAME);
+            assertThat(year, is(coursObject.getYear()));
+            assertThat(season, is(coursObject.getCours()));
+          } catch (final EntityNotFoundException e) {
+            fail(e.getMessage());
+          }
           for (final String shortTitle : bean.getShortTitles()) {
             assertTrue(StringUtils.isNotEmpty(shortTitle));
           }
@@ -242,9 +288,9 @@ public class AnimeInfoApiTest {
       assertTrue(CollectionUtils.isNotEmpty(yearSet));
       for (final Long year : yearSet) {
         final GetAnimeInfoRequest request = new GetAnimeInfoRequest();
-        final CoursObject requestCoursObject = new CoursObject();
-        requestCoursObject.setYear(year);
-        request.setCoursObject(requestCoursObject);
+        final PeriodBean requestPeriod = new PeriodBean();
+        requestPeriod.setYear(year);
+        request.setPeriodBean(requestPeriod);
         final Collection<AnimeInfoBean> animeInfoBeans = api.getAnimeInfoBeans(request).getItems();
         assertTrue(CollectionUtils.isNotEmpty(animeInfoBeans));
         for (final AnimeInfoBean bean : animeInfoBeans) {
@@ -253,9 +299,19 @@ public class AnimeInfoApiTest {
           for (final String hashTag : bean.getTwitterHashTags()) {
             assertTrue(StringUtils.isNotEmpty(hashTag));
           }
-          final CoursObject storedCoursObject = bean.getCoursObject();
-          assertThat(storedCoursObject.getYear(), is(year));
-          assertTrue(0 < storedCoursObject.getCours() && storedCoursObject.getCours() < 5);
+          try {
+            final Key key = KeyFactory.createKey(PeriodEntityInfo.KIND_NAME, bean.getPeriodId());
+            final Entity periodEntity = datastore.get(key);
+            assertThat(periodEntity.getProperties().keySet(), not(empty()));
+            final long storedYear =
+                (long) periodEntity.getProperty(PeriodEntityInfo.YEAR_PROPERTY_NAME);
+            final long season =
+                (long) periodEntity.getProperty(PeriodEntityInfo.SEASON_PROPERTY_NAME);
+            assertThat(storedYear, is(year));
+            assertThat(season, allOf(greaterThan(0L), lessThan(5L)));
+          } catch (final EntityNotFoundException e) {
+            fail(e.getMessage());
+          }
           for (final String shortTitle : bean.getShortTitles()) {
             assertTrue(StringUtils.isNotEmpty(shortTitle));
           }
@@ -273,9 +329,9 @@ public class AnimeInfoApiTest {
       final Map<String, CoursObject> coursMap = ExternalAnimeInfoUtils.requestCoursObjectMap();
       for (final CoursObject coursObject : coursMap.values()) {
         final GetAnimeInfoRequest request = new GetAnimeInfoRequest();
-        final CoursObject requestCoursObject = new CoursObject();
+        final PeriodBean requestCoursObject = new PeriodBean();
         requestCoursObject.setId(coursObject.getId());
-        request.setCoursObject(requestCoursObject);
+        request.setPeriodBean(requestCoursObject);
         final Collection<AnimeInfoBean> animeInfoBeans = api.getAnimeInfoBeans(request).getItems();
         assertTrue(CollectionUtils.isNotEmpty(animeInfoBeans));
         for (final AnimeInfoBean bean : animeInfoBeans) {
@@ -284,8 +340,18 @@ public class AnimeInfoApiTest {
           for (final String hashTag : bean.getTwitterHashTags()) {
             assertTrue(StringUtils.isNotEmpty(hashTag));
           }
-          final CoursObject storedCoursObject = bean.getCoursObject();
-          assertThat(storedCoursObject, is(coursObject));
+          try {
+            final Key key = KeyFactory.createKey(PeriodEntityInfo.KIND_NAME, bean.getPeriodId());
+            final Entity periodEntity = datastore.get(key);
+            assertThat(periodEntity.getProperties().keySet(), not(empty()));
+            final long year = (long) periodEntity.getProperty(PeriodEntityInfo.YEAR_PROPERTY_NAME);
+            final long season =
+                (long) periodEntity.getProperty(PeriodEntityInfo.SEASON_PROPERTY_NAME);
+            assertThat(year, is(coursObject.getYear()));
+            assertThat(season, is(coursObject.getCours()));
+          } catch (final EntityNotFoundException e) {
+            fail(e.getMessage());
+          }
           for (final String shortTitle : bean.getShortTitles()) {
             assertTrue(StringUtils.isNotEmpty(shortTitle));
           }
@@ -300,12 +366,12 @@ public class AnimeInfoApiTest {
   public void testGetCoursObjects() {
     try {
       api.connectExternalAndPutAll();
-      final Collection<CoursObject> coursObjects = api.getCoursObjects();
-      assertTrue(CollectionUtils.isNotEmpty(coursObjects));
-      for (final CoursObject coursObject : coursObjects) {
-        assertTrue(0 < coursObject.getId());
-        assertTrue(2000 < coursObject.getYear() && coursObject.getYear() < 3000);
-        assertTrue(0 < coursObject.getCours() && coursObject.getCours() < 5);
+      final Collection<PeriodBean> beans = api.getPeriodBeans();
+      assertTrue(CollectionUtils.isNotEmpty(beans));
+      for (final PeriodBean bean : beans) {
+        assertTrue(0 < bean.getId());
+        assertTrue(2000 < bean.getYear() && bean.getYear() < 3000);
+        assertTrue(0 < bean.getSeason() && bean.getSeason() < 5);
       }
     } catch (final InternalServerErrorException e) {
       fail(e.getMessage());
@@ -318,11 +384,11 @@ public class AnimeInfoApiTest {
       api.connectExternalAndPutCurrent();
       final AnimeInfoBean animeBean = new AnimeInfoBean();
       animeBean.setTitle("test title");
-      final Collection<CoursObject> coursObjects = api.getCoursObjects();
-      final CoursObject current = coursObjects.iterator().next();
-      animeBean.setCoursObject(current);
+      final Collection<PeriodBean> periodBeans = api.getPeriodBeans();
+      final PeriodBean current = periodBeans.iterator().next();
+      animeBean.setPeriodId(current.getId());
       final PostAnimeInfoRequest request = new PostAnimeInfoRequest();
-      request.setBeans(Arrays.asList(animeBean));
+      request.setItems(Arrays.asList(animeBean));
       final CollectionResponse<AnimeInfoBean> response = api.putAnimeInfoBeans(request);
       Collection<AnimeInfoBean> beans = response.getItems();
       final AnimeInfoBean putBean = CollectionUtils.find(beans, new Predicate<AnimeInfoBean>() {
@@ -332,14 +398,14 @@ public class AnimeInfoApiTest {
         }
       });
       assertThat(putBean.getTitle(), is(animeBean.getTitle()));
-      assertThat(putBean.getCoursObject(), is(animeBean.getCoursObject()));
+      assertThat(putBean.getPeriodId(), is(animeBean.getPeriodId()));
 
       putBean.setTitle("test title2");
-      request.setBeans(Arrays.asList(putBean));
+      request.setItems(Arrays.asList(putBean));
       beans = api.putAnimeInfoBeans(request).getItems();
       assertTrue(CollectionUtils.isNotEmpty(beans));
       final GetAnimeInfoRequest getRequest = new GetAnimeInfoRequest();
-      getRequest.setCoursObject(current);
+      getRequest.setPeriodBean(current);
       beans = api.getAnimeInfoBeans(getRequest).getItems();
       assertTrue(CollectionUtils.exists(beans, new Predicate<AnimeInfoBean>() {
         @Override
@@ -357,5 +423,48 @@ public class AnimeInfoApiTest {
       fail(e.getMessage());
     }
 
+  }
+
+  @Test
+  public void testPutAnimeInfoBeansForFailed() {
+    try {
+      api.connectExternalAndPutCurrent();
+      final PostAnimeInfoRequest request = new PostAnimeInfoRequest();
+      request.setItems(null);
+      CollectionResponse<AnimeInfoBean> response = api.putAnimeInfoBeans(request);
+      assertThat(response, not(nullValue()));
+      Collection<AnimeInfoBean> items = response.getItems();
+      assertThat(items, not(nullValue()));
+      assertThat(items.size(), is(0));
+
+      final PeriodBean period = api.getPeriodBeans().iterator().next();
+      AnimeInfoBean item = new AnimeInfoBean();
+      item.setPeriodId(period.getId());
+      request.setItems(Arrays.asList(item));
+      response = api.putAnimeInfoBeans(request);
+      assertThat(response, not(nullValue()));
+      items = response.getItems();
+      assertThat(items, not(nullValue()));
+      assertThat(items.size(), is(1));
+      for (final AnimeInfoBean animeInfoBean : items) {
+        assertThat(animeInfoBean.getId(), not(0L));
+      }
+
+      try {
+        api.putAnimeInfoBeans(null);
+        fail();
+      } catch (final NullPointerException e) {
+      }
+      try {
+        item = new AnimeInfoBean();
+        request.setItems(Arrays.asList(item));
+        api.putAnimeInfoBeans(request);
+        fail();
+      } catch (final NullPointerException e) {
+      }
+
+    } catch (final InternalServerErrorException e) {
+      fail(e.getMessage());
+    }
   }
 }
