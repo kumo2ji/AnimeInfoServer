@@ -87,22 +87,22 @@ public class AnimeDatastore {
     return createFilter(coursQuery);
   }
 
-  private static Filter createFilter(final long year, final long cours) {
-    final Query coursQuery = PeriodDatastore.queryForYear(year);
-    final Query coursQueryForCours = PeriodDatastore.queryForSeason(cours);
+  private static Filter createFilter(final long year, final long season) {
+    final Query periodQuery = PeriodDatastore.queryForYear(year);
+    final Query seasonQuery = PeriodDatastore.queryForSeason(season);
     final Filter coursFilter =
-        CompositeFilterOperator.and(coursQuery.getFilter(), coursQueryForCours.getFilter());
-    coursQuery.setFilter(coursFilter);
-    return createFilter(coursQuery);
+        CompositeFilterOperator.and(periodQuery.getFilter(), seasonQuery.getFilter());
+    periodQuery.setFilter(coursFilter);
+    return createFilter(periodQuery);
   }
 
-  private static Filter createFilter(final Query coursQuery) {
-    coursQuery.setKeysOnly();
-    coursQuery.addSort(PeriodEntityInfo.YEAR_PROPERTY_NAME)
+  private static Filter createFilter(final Query periodQuery) {
+    periodQuery.setKeysOnly();
+    periodQuery.addSort(PeriodEntityInfo.YEAR_PROPERTY_NAME)
         .addSort(PeriodEntityInfo.SEASON_PROPERTY_NAME);
-    final PreparedQuery coursPQuery = datastore.prepare(coursQuery);
+    final PreparedQuery periodPQuery = datastore.prepare(periodQuery);
     final Collection<Filter> filters =
-        CollectionUtils.collect(coursPQuery.asIterable(), new Transformer<Entity, Filter>() {
+        CollectionUtils.collect(periodPQuery.asIterable(), new Transformer<Entity, Filter>() {
           @Override
           public Filter transform(final Entity arg0) {
             return new FilterPredicate(AnimeEntityInfo.PERIOD_KEY_PROPERTY_NAME,
@@ -120,8 +120,7 @@ public class AnimeDatastore {
 
   public static PreparedQuery query() {
     final Query query = new Query(AnimeEntityInfo.KIND_NAME);
-    query.addSort(AnimeEntityInfo.PERIOD_KEY_PROPERTY_NAME)
-        .addSort(AnimeEntityInfo.TITLE_PROPERTY_NAME);
+    query.addSort(AnimeEntityInfo.TITLE_PROPERTY_NAME);
     return datastore.prepare(query);
   }
 
@@ -139,8 +138,7 @@ public class AnimeDatastore {
   public static PreparedQuery query(final long year) {
     final Query query = new Query(AnimeEntityInfo.KIND_NAME);
     query.setFilter(createFilter(year));
-    query.addSort(AnimeEntityInfo.PERIOD_KEY_PROPERTY_NAME)
-        .addSort(AnimeEntityInfo.TITLE_PROPERTY_NAME);
+    query.addSort(AnimeEntityInfo.TITLE_PROPERTY_NAME);
     return datastore.prepare(query);
   }
 
