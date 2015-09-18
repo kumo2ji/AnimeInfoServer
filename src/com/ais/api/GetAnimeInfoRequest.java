@@ -4,16 +4,16 @@ import java.io.Serializable;
 
 public class GetAnimeInfoRequest implements Serializable {
   private static final long serialVersionUID = 1L;
-  private PeriodBean periodBean;
+  private PeriodBean period;
   private int limit;
   private String cursor;
 
-  public PeriodBean getPeriodBean() {
-    return periodBean;
+  public PeriodBean getPeriod() {
+    return period;
   }
 
-  public void setPeriodBean(final PeriodBean periodBean) {
-    this.periodBean = periodBean;
+  public void setPeriod(final PeriodBean periodBean) {
+    this.period = periodBean;
   }
 
   public int getLimit() {

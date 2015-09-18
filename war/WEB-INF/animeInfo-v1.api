@@ -24,14 +24,45 @@
     "maxAge" : 0
   },
   "methods" : {
-    "animeInfo.auth.delete.anime.all" : {
-      "path" : "delete/anime/all",
+    "animeInfo.auth.delete.period.all" : {
+      "path" : "delete/period/all",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
       "clientIds" : [ "15768376430-hje5jprqasnqlg1j5sa9ru3lr55ks65u.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ais.api.AnimeInfoApi.deleteAllAnimeInfo",
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.deleteAllPeriod",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "animeInfo.erase.anime" : {
+      "path" : "erase/anime",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.deleteAnimeInfo",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "animeInfo.get.period" : {
+      "path" : "get/period",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.getPeriodBeans",
       "request" : {
         "body" : "empty"
       },
@@ -54,6 +85,21 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
+    "animeInfo.auth.delete.anime.all" : {
+      "path" : "delete/anime/all",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "15768376430-hje5jprqasnqlg1j5sa9ru3lr55ks65u.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.deleteAllAnimeInfo",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
     "animeInfo.auth.connect.external.put.current" : {
       "path" : "connect/current",
       "httpMethod" : "GET",
@@ -64,22 +110,6 @@
       "rosyMethod" : "com.ais.api.AnimeInfoApi.connectExternalAndPutCurrent",
       "request" : {
         "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "animeInfo.get.anime" : {
-      "path" : "get/anime",
-      "httpMethod" : "POST",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ais.api.AnimeInfoApi.getAnimeInfoBeans",
-      "request" : {
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
       },
       "response" : {
         "body" : "autoTemplate(backendResponse)"
@@ -101,47 +131,17 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "animeInfo.delete.anime" : {
-      "path" : "delete/anime",
+    "animeInfo.get.anime" : {
+      "path" : "get/anime",
       "httpMethod" : "POST",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
       "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ais.api.AnimeInfoApi.deleteAnimeInfo",
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.getAnimeInfoBeans",
       "request" : {
         "body" : "autoTemplate(backendRequest)",
         "bodyName" : "resource"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "animeInfo.auth.delete.period.all" : {
-      "path" : "delete/period/all",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "15768376430-hje5jprqasnqlg1j5sa9ru3lr55ks65u.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ais.api.AnimeInfoApi.deleteAllPeriod",
-      "request" : {
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "animeInfo.get.period" : {
-      "path" : "get/period",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ais.api.AnimeInfoApi.getPeriodBeans",
-      "request" : {
-        "body" : "empty"
       },
       "response" : {
         "body" : "autoTemplate(backendResponse)"
@@ -162,18 +162,16 @@
           }
         }
       },
-      "GetAnimeInfoRequest" : {
-        "id" : "GetAnimeInfoRequest",
+      "IdRequest" : {
+        "id" : "IdRequest",
         "type" : "object",
         "properties" : {
-          "periodBean" : {
-            "$ref" : "PeriodBean"
-          },
-          "limit" : {
-            "type" : "integer"
-          },
-          "cursor" : {
-            "type" : "string"
+          "ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "int64"
+            }
           }
         }
       },
@@ -195,8 +193,20 @@
           }
         }
       },
-      "CollectionResponse_AnimeInfoBean" : {
-        "id" : "CollectionResponse_AnimeInfoBean",
+      "PeriodBeanCollection" : {
+        "id" : "PeriodBeanCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "PeriodBean"
+            }
+          }
+        }
+      },
+      "PostAnimeInfoRequest" : {
+        "id" : "PostAnimeInfoRequest",
         "type" : "object",
         "properties" : {
           "items" : {
@@ -204,9 +214,6 @@
             "items" : {
               "$ref" : "AnimeInfoBean"
             }
-          },
-          "nextPageToken" : {
-            "type" : "string"
           }
         }
       },
@@ -253,8 +260,8 @@
           }
         }
       },
-      "PostAnimeInfoRequest" : {
-        "id" : "PostAnimeInfoRequest",
+      "CollectionResponse_AnimeInfoBean" : {
+        "id" : "CollectionResponse_AnimeInfoBean",
         "type" : "object",
         "properties" : {
           "items" : {
@@ -262,65 +269,32 @@
             "items" : {
               "$ref" : "AnimeInfoBean"
             }
+          },
+          "nextPageToken" : {
+            "type" : "string"
           }
         }
       },
-      "IdRequest" : {
-        "id" : "IdRequest",
+      "GetAnimeInfoRequest" : {
+        "id" : "GetAnimeInfoRequest",
         "type" : "object",
         "properties" : {
-          "ids" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "format" : "int64"
-            }
-          }
-        }
-      },
-      "PeriodBeanCollection" : {
-        "id" : "PeriodBeanCollection",
-        "type" : "object",
-        "properties" : {
-          "items" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "PeriodBean"
-            }
+          "period" : {
+            "$ref" : "PeriodBean"
+          },
+          "limit" : {
+            "type" : "integer"
+          },
+          "cursor" : {
+            "type" : "string"
           }
         }
       }
     },
     "methods" : {
-      "com.ais.api.AnimeInfoApi.deleteAllAnimeInfo" : {
+      "com.ais.api.AnimeInfoApi.deleteAllPeriod" : {
         "response" : {
           "$ref" : "BooleanResponse"
-        }
-      },
-      "com.ais.api.AnimeInfoApi.connectExternalAndPutAll" : {
-        "response" : {
-          "$ref" : "BooleanResponse"
-        }
-      },
-      "com.ais.api.AnimeInfoApi.connectExternalAndPutCurrent" : {
-        "response" : {
-          "$ref" : "BooleanResponse"
-        }
-      },
-      "com.ais.api.AnimeInfoApi.getAnimeInfoBeans" : {
-        "request" : {
-          "$ref" : "GetAnimeInfoRequest"
-        },
-        "response" : {
-          "$ref" : "CollectionResponse_AnimeInfoBean"
-        }
-      },
-      "com.ais.api.AnimeInfoApi.putAnimeInfoBeans" : {
-        "request" : {
-          "$ref" : "PostAnimeInfoRequest"
-        },
-        "response" : {
-          "$ref" : "CollectionResponse_AnimeInfoBean"
         }
       },
       "com.ais.api.AnimeInfoApi.deleteAnimeInfo" : {
@@ -331,14 +305,40 @@
           "$ref" : "BooleanResponse"
         }
       },
-      "com.ais.api.AnimeInfoApi.deleteAllPeriod" : {
+      "com.ais.api.AnimeInfoApi.getPeriodBeans" : {
+        "response" : {
+          "$ref" : "PeriodBeanCollection"
+        }
+      },
+      "com.ais.api.AnimeInfoApi.connectExternalAndPutAll" : {
         "response" : {
           "$ref" : "BooleanResponse"
         }
       },
-      "com.ais.api.AnimeInfoApi.getPeriodBeans" : {
+      "com.ais.api.AnimeInfoApi.deleteAllAnimeInfo" : {
         "response" : {
-          "$ref" : "PeriodBeanCollection"
+          "$ref" : "BooleanResponse"
+        }
+      },
+      "com.ais.api.AnimeInfoApi.connectExternalAndPutCurrent" : {
+        "response" : {
+          "$ref" : "BooleanResponse"
+        }
+      },
+      "com.ais.api.AnimeInfoApi.putAnimeInfoBeans" : {
+        "request" : {
+          "$ref" : "PostAnimeInfoRequest"
+        },
+        "response" : {
+          "$ref" : "CollectionResponse_AnimeInfoBean"
+        }
+      },
+      "com.ais.api.AnimeInfoApi.getAnimeInfoBeans" : {
+        "request" : {
+          "$ref" : "GetAnimeInfoRequest"
+        },
+        "response" : {
+          "$ref" : "CollectionResponse_AnimeInfoBean"
         }
       }
     }

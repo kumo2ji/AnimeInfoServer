@@ -193,6 +193,10 @@ public class AnimeInfoApiTest {
       api.connectExternalAndPutCurrent();
       pQuery = AnimeDatastore.query();
       assertThat(pQuery.countEntities(FetchOptions.Builder.withDefaults()), is(count));
+      api.deleteAllAnimeInfo();
+      api.connectExternalAndPutCurrent();
+      pQuery = AnimeDatastore.query();
+      assertThat(pQuery.countEntities(FetchOptions.Builder.withDefaults()), is(count));
     } catch (final InternalServerErrorException | IOException e) {
       fail(e.getMessage());
     }
@@ -241,7 +245,7 @@ public class AnimeInfoApiTest {
         final PeriodBean requestPeriod = new PeriodBean();
         requestPeriod.setYear(coursObject.getYear());
         requestPeriod.setSeason(coursObject.getCours());
-        request.setPeriodBean(requestPeriod);
+        request.setPeriod(requestPeriod);
         final Collection<AnimeInfoBean> animeInfoBeans = api.getAnimeInfoBeans(request).getItems();
         assertTrue(CollectionUtils.isNotEmpty(animeInfoBeans));
         for (final AnimeInfoBean bean : animeInfoBeans) {
@@ -290,7 +294,7 @@ public class AnimeInfoApiTest {
         final GetAnimeInfoRequest request = new GetAnimeInfoRequest();
         final PeriodBean requestPeriod = new PeriodBean();
         requestPeriod.setYear(year);
-        request.setPeriodBean(requestPeriod);
+        request.setPeriod(requestPeriod);
         final Collection<AnimeInfoBean> animeInfoBeans = api.getAnimeInfoBeans(request).getItems();
         assertTrue(CollectionUtils.isNotEmpty(animeInfoBeans));
         for (final AnimeInfoBean bean : animeInfoBeans) {
@@ -326,12 +330,13 @@ public class AnimeInfoApiTest {
   public void testGetAnimeInfoBeansWithId() {
     try {
       api.connectExternalAndPutAll();
-      final Map<String, CoursObject> coursMap = ExternalAnimeInfoUtils.requestCoursObjectMap();
-      for (final CoursObject coursObject : coursMap.values()) {
+      final Collection<PeriodBean> periodBeans = api.getPeriodBeans();
+      assertThat(periodBeans, not(empty()));
+      for (final PeriodBean period : periodBeans) {
         final GetAnimeInfoRequest request = new GetAnimeInfoRequest();
-        final PeriodBean requestCoursObject = new PeriodBean();
-        requestCoursObject.setId(coursObject.getId());
-        request.setPeriodBean(requestCoursObject);
+        final PeriodBean requestPeriod = new PeriodBean();
+        requestPeriod.setId(period.getId());
+        request.setPeriod(requestPeriod);
         final Collection<AnimeInfoBean> animeInfoBeans = api.getAnimeInfoBeans(request).getItems();
         assertTrue(CollectionUtils.isNotEmpty(animeInfoBeans));
         for (final AnimeInfoBean bean : animeInfoBeans) {
@@ -347,8 +352,8 @@ public class AnimeInfoApiTest {
             final long year = (long) periodEntity.getProperty(PeriodEntityInfo.YEAR_PROPERTY_NAME);
             final long season =
                 (long) periodEntity.getProperty(PeriodEntityInfo.SEASON_PROPERTY_NAME);
-            assertThat(year, is(coursObject.getYear()));
-            assertThat(season, is(coursObject.getCours()));
+            assertThat(year, is(period.getYear()));
+            assertThat(season, is(period.getSeason()));
           } catch (final EntityNotFoundException e) {
             fail(e.getMessage());
           }
@@ -357,7 +362,7 @@ public class AnimeInfoApiTest {
           }
         }
       }
-    } catch (final InternalServerErrorException | IOException e) {
+    } catch (final InternalServerErrorException e) {
       fail(e.getMessage());
     }
   }
@@ -405,7 +410,7 @@ public class AnimeInfoApiTest {
       beans = api.putAnimeInfoBeans(request).getItems();
       assertTrue(CollectionUtils.isNotEmpty(beans));
       final GetAnimeInfoRequest getRequest = new GetAnimeInfoRequest();
-      getRequest.setPeriodBean(current);
+      getRequest.setPeriod(current);
       beans = api.getAnimeInfoBeans(getRequest).getItems();
       assertTrue(CollectionUtils.exists(beans, new Predicate<AnimeInfoBean>() {
         @Override
@@ -460,7 +465,7 @@ public class AnimeInfoApiTest {
         request.setItems(Arrays.asList(item));
         api.putAnimeInfoBeans(request);
         fail();
-      } catch (final NullPointerException e) {
+      } catch (final IllegalArgumentException e) {
       }
 
     } catch (final InternalServerErrorException e) {

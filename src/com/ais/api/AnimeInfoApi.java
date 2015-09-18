@@ -58,19 +58,13 @@ public class AnimeInfoApi {
     try {
       final Map<String, CoursObject> coursMap = ExternalAnimeInfoUtils.requestCoursObjectMap();
       final Collection<CoursObject> coursObjects = coursMap.values();
-      final List<Key> coursKeys = PeriodDatastore.put(coursObjects);
-      if (CollectionUtils.isEmpty(coursKeys)) {
-        return new BooleanResponse(false, "failed to store coursObject");
-      }
+      PeriodDatastore.put(coursObjects);
       final List<AnimeBaseObject> list = new ArrayList<AnimeBaseObject>();
       for (final CoursObject coursObject : coursObjects) {
         list.addAll(ExternalAnimeInfoUtils.requestAnimeBaseObjects(coursObject.getYear(),
             coursObject.getCours()));
       }
-      final List<Key> animeKeys = AnimeDatastore.putAnimeBaseObjects(list);
-      if (CollectionUtils.isEmpty(animeKeys)) {
-        return new BooleanResponse(false, "failed to store animeBaseObject");
-      }
+      AnimeDatastore.putAnimeBaseObjects(list);
     } catch (final IOException e) {
       throw new InternalServerErrorException(e);
     }
@@ -104,7 +98,7 @@ public class AnimeInfoApi {
 
   @ApiMethod(path = "get/anime", name = "get.anime", httpMethod = HttpMethod.POST)
   public CollectionResponse<AnimeInfoBean> getAnimeInfoBeans(final GetAnimeInfoRequest request) {
-    final PreparedQuery preparedQuery = queryAnimeInfo(request.getPeriodBean());
+    final PreparedQuery preparedQuery = queryAnimeInfo(request.getPeriod());
     final FetchOptions options = createFetchOptions(request.getLimit(), request.getCursor());
     final QueryResultList<Entity> entityList = preparedQuery.asQueryResultList(options);
     final Collection<AnimeInfoBean> beans =
@@ -129,7 +123,7 @@ public class AnimeInfoApi {
     return builder.build();
   }
 
-  @ApiMethod(name = "delete.anime", path = "delete/anime", httpMethod = HttpMethod.POST)
+  @ApiMethod(name = "erase.anime", path = "erase/anime", httpMethod = HttpMethod.POST)
   public BooleanResponse deleteAnimeInfo(final IdRequest request) {
     AnimeDatastore.delete(request.getIds());
     return new BooleanResponse(true);
