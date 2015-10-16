@@ -10,8 +10,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 public class StaffDatastore {
-  public static List<Key> create(final Collection<Long> animeIds) {
-    final CreateStaffRecipe recipe = new CreateStaffRecipe(animeIds);
+  public static List<Key> create(final Collection<String> names) {
+    final CreateStaffRecipe recipe = new CreateStaffRecipe(names);
     return DatastoreUtils.create(recipe);
   }
 
@@ -21,8 +21,8 @@ public class StaffDatastore {
     return DatastoreUtils.put(entities);
   }
 
-  public static Collection<StaffInfoBean> query(final Collection<Long> animeIds) {
-    final List<Entity> entities = DatastoreUtils.query(new StaffAnimeIdMultiFilter(animeIds));
+  public static Collection<StaffInfoBean> query(final Collection<String> names) {
+    final List<Entity> entities = DatastoreUtils.query(new StaffNameMultiFilter(names));
     return CollectionUtils.collect(entities, StaffEntityInfo.entityToBean());
   }
 }

@@ -27,6 +27,11 @@ public class AnimeEntityInfo {
   public static final String PERIOD_KEY_PROPERTY_NAME = "periodKey";
   public static final String SEQUAL_PROPERTY_NAME = "sequel";
   public static final String SEX_PROPERTY_NAME = "sex";
+  public static final String WIKI_TITLE_PROPERTY_NAME = "wikiTitle";
+  public static final String DIRECTORS_PROPERTY_NAME = "directors";
+  public static final String WRITERS_PROPERTY_NAME = "writers";
+  public static final String MUSICIANS_PROPERTY_NAME = "musicians";
+  public static final String STUDIOS_PROPERTY_NAME = "studios";
 
   public static Transformer<AnimeBaseObject, Entity> getAnimeBaseObjectToEntityTransformer() {
     return new Transformer<AnimeBaseObject, Entity>() {
@@ -83,6 +88,11 @@ public class AnimeEntityInfo {
         entity.setProperty(SHORT_TITLES_PROPERTY_NAME, input.getShortTitles());
         entity.setProperty(TWITTER_ACCOUNT_PROPERTY_NAME, input.getTwitterAccount());
         entity.setProperty(TWITTER_HASH_TAGS_PROPERTY_NAME, input.getTwitterHashTags());
+        entity.setProperty(WIKI_TITLE_PROPERTY_NAME, input.getWikiTitle());
+
+        entity.setProperty(DIRECTORS_PROPERTY_NAME, input.getDirectors());
+        entity.setProperty(WRITERS_PROPERTY_NAME, input.getWriters());
+        entity.setProperty(MUSICIANS_PROPERTY_NAME, input.getMusicians());
         return entity;
       }
     };
