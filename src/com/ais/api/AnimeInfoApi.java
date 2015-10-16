@@ -34,7 +34,6 @@ import com.google.appengine.api.datastore.QueryResultList;
 @Api(name = "animeInfo")
 public class AnimeInfoApi {
   // private static final Logger logger = Logger.getLogger(AnimeInfoApi.class.getName());
-  private static final AnimeEntityInfo animeEntityInfo = new AnimeEntityInfo();
 
   @ApiMethod(name = "auth.delete.anime.all", path = "delete/anime/all", httpMethod = HttpMethod.GET,
       scopes = {ApiConstants.EMAIL_SCOPE}, clientIds = {ApiConstants.WEB_CLIENT_ID})
@@ -58,13 +57,13 @@ public class AnimeInfoApi {
     try {
       final Map<String, CoursObject> coursMap = ExternalAnimeInfoUtils.requestCoursObjectMap();
       final Collection<CoursObject> coursObjects = coursMap.values();
-      PeriodDatastore.put(coursObjects);
+      PeriodDatastore.create(coursObjects);
       final List<AnimeBaseObject> list = new ArrayList<AnimeBaseObject>();
       for (final CoursObject coursObject : coursObjects) {
         list.addAll(ExternalAnimeInfoUtils.requestAnimeBaseObjects(coursObject.getYear(),
             coursObject.getCours()));
       }
-      AnimeDatastore.putAnimeBaseObjects(list);
+      AnimeDatastore.create(list);
     } catch (final IOException e) {
       throw new InternalServerErrorException(e);
     }
@@ -81,14 +80,14 @@ public class AnimeInfoApi {
       if (CollectionUtils.isEmpty(coursObjects)) {
         return new BooleanResponse(false, "failed to connect external server");
       }
-      PeriodDatastore.put(coursObjects);
+      PeriodDatastore.create(coursObjects);
       final CoursObject current = Collections.max(coursObjects, new Comparator<CoursObject>() {
         @Override
         public int compare(final CoursObject o1, final CoursObject o2) {
           return (int) (o1.getId() - o2.getId());
         }
       });
-      AnimeDatastore.putAnimeBaseObjects(
+      AnimeDatastore.create(
           ExternalAnimeInfoUtils.requestAnimeBaseObjects(current.getYear(), current.getCours()));
     } catch (final IOException e) {
       throw new InternalServerErrorException(e);
@@ -102,7 +101,7 @@ public class AnimeInfoApi {
     final FetchOptions options = createFetchOptions(request.getLimit(), request.getCursor());
     final QueryResultList<Entity> entityList = preparedQuery.asQueryResultList(options);
     final Collection<AnimeInfoBean> beans =
-        CollectionUtils.collect(entityList, animeEntityInfo.getEntityToAnimeInfoBeanTransformer());
+        CollectionUtils.collect(entityList, AnimeEntityInfo.getEntityToAnimeInfoBeanTransformer());
     final Builder<AnimeInfoBean> builder = CollectionResponse.<AnimeInfoBean>builder();
     builder.setItems(beans);
     final Cursor cursor = entityList.getCursor();
@@ -117,7 +116,7 @@ public class AnimeInfoApi {
     final List<Key> keys = AnimeDatastore.put(request.getItems());
     final Map<Key, Entity> map = AnimeDatastore.query(keys);
     final Collection<AnimeInfoBean> putBeans = CollectionUtils.collect(map.values(),
-        animeEntityInfo.getEntityToAnimeInfoBeanTransformer());
+        AnimeEntityInfo.getEntityToAnimeInfoBeanTransformer());
     final Builder<AnimeInfoBean> builder = CollectionResponse.<AnimeInfoBean>builder();
     builder.setItems(putBeans);
     return builder.build();
@@ -129,12 +128,21 @@ public class AnimeInfoApi {
     return new BooleanResponse(true);
   }
 
-  @ApiMethod(path = "get/period", name = "get.period")
+  @ApiMethod(path = "get/period", name = "get.period", httpMethod = HttpMethod.GET)
   public Collection<PeriodBean> getPeriodBeans() {
-    final PeriodEntityInfo entityInfo = new PeriodEntityInfo();
     final PreparedQuery preparedQuery = PeriodDatastore.query();
     return CollectionUtils.collect(preparedQuery.asIterable(),
-        entityInfo.getEntityToPeriodBeanTransformer());
+        PeriodEntityInfo.getEntityToPeriodBeanTransformer());
+  }
+
+  @ApiMethod(path = "get/staff", name = "get.staff", httpMethod = HttpMethod.POST)
+  public CollectionResponse<StaffInfoBean> getStaffInfo(final IdRequest request) {
+    return null;
+  }
+
+  @ApiMethod(path = "put/staff", name = "put.staff", httpMethod = HttpMethod.POST)
+  public BooleanResponse putStaffInfo(final PostStaffInfoRequest request) {
+    return null;
   }
 
   private FetchOptions createFetchOptions(final int limit, final String cursorString) {

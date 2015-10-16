@@ -14,6 +14,11 @@ public class AnimeInfoBean implements Serializable {
   private long periodId;
   private long sex;
   private long sequel;
+  private String wikiTitle;
+  private Collection<String> directors;
+  private Collection<String> writers;
+  private Collection<String> musicians;
+  private Collection<String> studios;
 
   public final long getId() {
     return id;
@@ -87,11 +92,53 @@ public class AnimeInfoBean implements Serializable {
     this.sequel = sequel;
   }
 
+  public String getWikiTitle() {
+    return wikiTitle;
+  }
+
+  public void setWikiTitle(final String wikiTitle) {
+    this.wikiTitle = wikiTitle;
+  }
+
+  public Collection<String> getDirectors() {
+    return directors;
+  }
+
+  public void setDirectors(final Collection<String> directors) {
+    this.directors = directors;
+  }
+
+  public Collection<String> getWriters() {
+    return writers;
+  }
+
+  public void setWriters(final Collection<String> writers) {
+    this.writers = writers;
+  }
+
+  public Collection<String> getMusicians() {
+    return musicians;
+  }
+
+  public void setMusicians(final Collection<String> musicians) {
+    this.musicians = musicians;
+  }
+
+  public Collection<String> getStudios() {
+    return studios;
+  }
+
+  public void setStudios(final Collection<String> studios) {
+    this.studios = studios;
+  }
+
   @Override
   public String toString() {
     return "AnimeInfoBean [id=" + id + ", title=" + title + ", shortTitles=" + shortTitles
         + ", publicUrl=" + publicUrl + ", twitterAccount=" + twitterAccount + ", twitterHashTags="
-        + twitterHashTags + ", periodId=" + periodId + ", sex=" + sex + ", sequel=" + sequel + "]";
+        + twitterHashTags + ", periodId=" + periodId + ", sex=" + sex + ", sequel=" + sequel
+        + ", wikiTitle=" + wikiTitle + ", directors=" + directors + ", writers=" + writers
+        + ", musicians=" + musicians + ", studios=" + studios + "]";
   }
 
 }

@@ -28,7 +28,7 @@ public class AnimeEntityInfo {
   public static final String SEQUAL_PROPERTY_NAME = "sequel";
   public static final String SEX_PROPERTY_NAME = "sex";
 
-  public Transformer<AnimeBaseObject, Entity> getAnimeBaseObjectToEntityTransformer() {
+  public static Transformer<AnimeBaseObject, Entity> getAnimeBaseObjectToEntityTransformer() {
     return new Transformer<AnimeBaseObject, Entity>() {
       @Override
       public Entity transform(final AnimeBaseObject input) {
@@ -50,7 +50,7 @@ public class AnimeEntityInfo {
     };
   }
 
-  private Collection<String> createCollection(final String... values) {
+  private static Collection<String> createCollection(final String... values) {
     final List<String> list = Arrays.asList(values);
     return CollectionUtils.select(list, new Predicate<String>() {
       @Override
@@ -60,7 +60,7 @@ public class AnimeEntityInfo {
     });
   }
 
-  public Transformer<AnimeInfoBean, Entity> getAnimeInfoBeanToEntityTransformer() {
+  public static Transformer<AnimeInfoBean, Entity> getAnimeInfoBeanToEntityTransformer() {
     return new Transformer<AnimeInfoBean, Entity>() {
       @Override
       public Entity transform(final AnimeInfoBean input) {
@@ -68,7 +68,7 @@ public class AnimeEntityInfo {
         if (input.getId() > 0) {
           final Key animeKey = KeyFactory.createKey(KIND_NAME, input.getId());
           try {
-            entity = DatastoreUtils.getEntity(animeKey);
+            entity = DatastoreUtils.get(animeKey);
           } catch (final EntityNotFoundException e) {
             e.printStackTrace();
           }
@@ -88,7 +88,7 @@ public class AnimeEntityInfo {
     };
   }
 
-  public Transformer<Entity, AnimeInfoBean> getEntityToAnimeInfoBeanTransformer() {
+  public static Transformer<Entity, AnimeInfoBean> getEntityToAnimeInfoBeanTransformer() {
     return new Transformer<Entity, AnimeInfoBean>() {
       @SuppressWarnings("unchecked")
       @Override

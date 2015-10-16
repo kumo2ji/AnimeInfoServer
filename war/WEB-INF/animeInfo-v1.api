@@ -55,6 +55,38 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
+    "animeInfo.get.staff" : {
+      "path" : "get/staff",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.getStaffInfo",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "animeInfo.put.staff" : {
+      "path" : "put/staff",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.putStaffInfo",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
     "animeInfo.get.period" : {
       "path" : "get/period",
       "httpMethod" : "GET",
@@ -63,21 +95,6 @@
       "audiences" : [ ],
       "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
       "rosyMethod" : "com.ais.api.AnimeInfoApi.getPeriodBeans",
-      "request" : {
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "animeInfo.auth.connect.external.put.all" : {
-      "path" : "connect/all",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "15768376430-hje5jprqasnqlg1j5sa9ru3lr55ks65u.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ais.api.AnimeInfoApi.connectExternalAndPutAll",
       "request" : {
         "body" : "empty"
       },
@@ -100,16 +117,32 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "animeInfo.auth.connect.external.put.current" : {
-      "path" : "connect/current",
+    "animeInfo.auth.connect.external.put.all" : {
+      "path" : "connect/all",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
       "clientIds" : [ "15768376430-hje5jprqasnqlg1j5sa9ru3lr55ks65u.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ais.api.AnimeInfoApi.connectExternalAndPutCurrent",
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.connectExternalAndPutAll",
       "request" : {
         "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "animeInfo.get.anime" : {
+      "path" : "get/anime",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.getAnimeInfoBeans",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
       },
       "response" : {
         "body" : "autoTemplate(backendResponse)"
@@ -131,17 +164,16 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "animeInfo.get.anime" : {
-      "path" : "get/anime",
-      "httpMethod" : "POST",
+    "animeInfo.auth.connect.external.put.current" : {
+      "path" : "connect/current",
+      "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
-      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ais.api.AnimeInfoApi.getAnimeInfoBeans",
+      "clientIds" : [ "15768376430-hje5jprqasnqlg1j5sa9ru3lr55ks65u.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ais.api.AnimeInfoApi.connectExternalAndPutCurrent",
       "request" : {
-        "body" : "autoTemplate(backendRequest)",
-        "bodyName" : "resource"
+        "body" : "empty"
       },
       "response" : {
         "body" : "autoTemplate(backendResponse)"
@@ -171,6 +203,71 @@
             "items" : {
               "type" : "string",
               "format" : "int64"
+            }
+          }
+        }
+      },
+      "CollectionResponse_StaffInfoBean" : {
+        "id" : "CollectionResponse_StaffInfoBean",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "StaffInfoBean"
+            }
+          },
+          "nextPageToken" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StaffInfoBean" : {
+        "id" : "StaffInfoBean",
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "animeId" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "directors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "writers" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "musicians" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "studios" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "PostStaffInfoRequest" : {
+        "id" : "PostStaffInfoRequest",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "StaffInfoBean"
             }
           }
         }
@@ -205,8 +302,23 @@
           }
         }
       },
-      "PostAnimeInfoRequest" : {
-        "id" : "PostAnimeInfoRequest",
+      "GetAnimeInfoRequest" : {
+        "id" : "GetAnimeInfoRequest",
+        "type" : "object",
+        "properties" : {
+          "period" : {
+            "$ref" : "PeriodBean"
+          },
+          "limit" : {
+            "type" : "integer"
+          },
+          "cursor" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CollectionResponse_AnimeInfoBean" : {
+        "id" : "CollectionResponse_AnimeInfoBean",
         "type" : "object",
         "properties" : {
           "items" : {
@@ -214,6 +326,9 @@
             "items" : {
               "$ref" : "AnimeInfoBean"
             }
+          },
+          "nextPageToken" : {
+            "type" : "string"
           }
         }
       },
@@ -257,11 +372,38 @@
           "sequel" : {
             "type" : "string",
             "format" : "int64"
+          },
+          "wikiTitle" : {
+            "type" : "string"
+          },
+          "directors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "writers" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "musicians" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "studios" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
-      "CollectionResponse_AnimeInfoBean" : {
-        "id" : "CollectionResponse_AnimeInfoBean",
+      "PostAnimeInfoRequest" : {
+        "id" : "PostAnimeInfoRequest",
         "type" : "object",
         "properties" : {
           "items" : {
@@ -269,24 +411,6 @@
             "items" : {
               "$ref" : "AnimeInfoBean"
             }
-          },
-          "nextPageToken" : {
-            "type" : "string"
-          }
-        }
-      },
-      "GetAnimeInfoRequest" : {
-        "id" : "GetAnimeInfoRequest",
-        "type" : "object",
-        "properties" : {
-          "period" : {
-            "$ref" : "PeriodBean"
-          },
-          "limit" : {
-            "type" : "integer"
-          },
-          "cursor" : {
-            "type" : "string"
           }
         }
       }
@@ -305,14 +429,25 @@
           "$ref" : "BooleanResponse"
         }
       },
+      "com.ais.api.AnimeInfoApi.getStaffInfo" : {
+        "request" : {
+          "$ref" : "IdRequest"
+        },
+        "response" : {
+          "$ref" : "CollectionResponse_StaffInfoBean"
+        }
+      },
+      "com.ais.api.AnimeInfoApi.putStaffInfo" : {
+        "request" : {
+          "$ref" : "PostStaffInfoRequest"
+        },
+        "response" : {
+          "$ref" : "BooleanResponse"
+        }
+      },
       "com.ais.api.AnimeInfoApi.getPeriodBeans" : {
         "response" : {
           "$ref" : "PeriodBeanCollection"
-        }
-      },
-      "com.ais.api.AnimeInfoApi.connectExternalAndPutAll" : {
-        "response" : {
-          "$ref" : "BooleanResponse"
         }
       },
       "com.ais.api.AnimeInfoApi.deleteAllAnimeInfo" : {
@@ -320,9 +455,17 @@
           "$ref" : "BooleanResponse"
         }
       },
-      "com.ais.api.AnimeInfoApi.connectExternalAndPutCurrent" : {
+      "com.ais.api.AnimeInfoApi.connectExternalAndPutAll" : {
         "response" : {
           "$ref" : "BooleanResponse"
+        }
+      },
+      "com.ais.api.AnimeInfoApi.getAnimeInfoBeans" : {
+        "request" : {
+          "$ref" : "GetAnimeInfoRequest"
+        },
+        "response" : {
+          "$ref" : "CollectionResponse_AnimeInfoBean"
         }
       },
       "com.ais.api.AnimeInfoApi.putAnimeInfoBeans" : {
@@ -333,12 +476,9 @@
           "$ref" : "CollectionResponse_AnimeInfoBean"
         }
       },
-      "com.ais.api.AnimeInfoApi.getAnimeInfoBeans" : {
-        "request" : {
-          "$ref" : "GetAnimeInfoRequest"
-        },
+      "com.ais.api.AnimeInfoApi.connectExternalAndPutCurrent" : {
         "response" : {
-          "$ref" : "CollectionResponse_AnimeInfoBean"
+          "$ref" : "BooleanResponse"
         }
       }
     }

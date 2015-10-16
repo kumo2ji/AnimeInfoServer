@@ -3,8 +3,7 @@ package com.ais.api;
 import java.io.Serializable;
 import java.util.Collection;
 
-
-public class PostAnimeInfoRequest implements Serializable {
+class PostAnimeInfoRequest implements Serializable {
   private static final long serialVersionUID = 1L;
   private Collection<AnimeInfoBean> items;
 

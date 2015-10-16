@@ -14,7 +14,7 @@ public class PeriodEntityInfo {
   public static final String YEAR_PROPERTY_NAME = "year";
   public static final String SEASON_PROPERTY_NAME = "season";
 
-  public Transformer<CoursObject, Entity> getCoursObjectToEntityTransformer() {
+  public static Transformer<CoursObject, Entity> getCoursObjectToEntityTransformer() {
     return new Transformer<CoursObject, Entity>() {
       @Override
       public Entity transform(final CoursObject arg0) {
@@ -26,7 +26,7 @@ public class PeriodEntityInfo {
     };
   }
 
-  public Transformer<Entity, PeriodBean> getEntityToPeriodBeanTransformer() {
+  public static Transformer<Entity, PeriodBean> getEntityToPeriodBeanTransformer() {
     return new Transformer<Entity, PeriodBean>() {
       @Override
       public PeriodBean transform(final Entity arg0) {
@@ -39,13 +39,13 @@ public class PeriodEntityInfo {
     };
   }
 
-  public Transformer<Long, PeriodBean> getIdToPeriodBeanTransformer() {
+  public static Transformer<Long, PeriodBean> getIdToPeriodBeanTransformer() {
     return new Transformer<Long, PeriodBean>() {
       @Override
       public PeriodBean transform(final Long arg0) {
         final Key key = KeyFactory.createKey(KIND_NAME, arg0);
         try {
-          final Entity entity = DatastoreUtils.getEntity(key);
+          final Entity entity = DatastoreUtils.get(key);
           return getEntityToPeriodBeanTransformer().transform(entity);
         } catch (final EntityNotFoundException e) {
           e.printStackTrace();

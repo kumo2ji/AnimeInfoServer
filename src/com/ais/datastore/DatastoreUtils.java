@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.Transformer;
 
-import com.ais.utils.BiFunc;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -25,6 +25,18 @@ public class DatastoreUtils {
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   private DatastoreUtils() {}
+
+  public static PreparedQuery prepare(final Query query) {
+    return datastore.prepare(query);
+  }
+
+  public static List<Key> put(final Iterable<Entity> entities) {
+    return datastore.put(entities);
+  }
+
+  public static Map<Key, Entity> get(final Iterable<Key> keys) {
+    return datastore.get(keys);
+  }
 
   public static void delete(final String kindName) {
     final Query query = new Query(kindName);
@@ -50,8 +62,32 @@ public class DatastoreUtils {
     datastore.delete(keys);
   }
 
-  public static List<Entity> queryWithSplitFilters(final Collection<Filter> filters,
-      final int count, final Transformer<Collection<Filter>, PreparedQuery> transformer) {
+  public static Entity get(final Key key) throws EntityNotFoundException {
+    return datastore.get(key);
+  }
+
+  public static <T, K> List<Key> create(final Creatable<T, K> recipe) {
+    final Collection<Entity> storedEntities = query(recipe.getMultiFilter());
+    final Collection<K> beans = CollectionUtils.collect(storedEntities, recipe.toBeanTransformer());
+    final Collection<T> objectsWithoutSame =
+        CollectionUtils.select(recipe.getTargets(), new Predicate<T>() {
+          @Override
+          public boolean evaluate(final T baseObject) {
+            return !CollectionUtils.exists(beans, new Predicate<K>() {
+              @Override
+              public boolean evaluate(final K arg0) {
+                return recipe.equals(baseObject, arg0);
+              }
+            });
+          }
+        });
+    final Collection<Entity> entities =
+        CollectionUtils.collect(objectsWithoutSame, recipe.toEntityTransformer());
+    return datastore.put(entities);
+  }
+
+  private static List<Entity> query(final Collection<Filter> filters, final int count,
+      final Transformer<Collection<Filter>, PreparedQuery> transformer) {
     final List<Entity> entities = new ArrayList<Entity>();
     final int loop = (int) Math.ceil((double) filters.size() / count);
     final Iterator<Filter> iterator = filters.iterator();
@@ -66,36 +102,9 @@ public class DatastoreUtils {
     return entities;
   }
 
-  public static Entity getEntity(final Key key) throws EntityNotFoundException {
-    return datastore.get(key);
-  }
-
-  public static <T, K> List<Key> put(final String kindName, final Collection<T> objects,
-      final Transformer<T, Filter> toFilterTransformer,
-      final Transformer<Entity, K> toBeanTransformer, final BiFunc<T, K, Boolean> equalFunc,
-      final Transformer<T, Entity> toEntityTransformer) {
-    final Collection<Entity> storedEntities =
-        queryWithObject(kindName, objects, toFilterTransformer);
-    final Collection<K> beans = CollectionUtils.collect(storedEntities, toBeanTransformer);
-    final Collection<T> objectsWithoutSame = CollectionUtils.select(objects, new Predicate<T>() {
-      @Override
-      public boolean evaluate(final T baseObject) {
-        return !CollectionUtils.exists(beans, new Predicate<K>() {
-          @Override
-          public boolean evaluate(final K arg0) {
-            return equalFunc.apply(baseObject, arg0);
-          }
-        });
-      }
-    });
-    final Collection<Entity> entities =
-        CollectionUtils.collect(objectsWithoutSame, toEntityTransformer);
-    return datastore.put(entities);
-  }
-
-  private static <T> List<Entity> queryWithObject(final String kindName,
-      final Collection<T> objects, final Transformer<T, Filter> toFilterTransformer) {
-    final Collection<Filter> filters = CollectionUtils.collect(objects, toFilterTransformer);
+  public static <T> List<Entity> query(final MultiFilterable<T> multiFilter) {
+    final Collection<Filter> filters =
+        CollectionUtils.collect(multiFilter.getFilterValues(), multiFilter.toFilterTransformer());
     final Collection<Filter> filtersWithoutNull =
         CollectionUtils.select(filters, new Predicate<Filter>() {
           @Override
@@ -103,16 +112,20 @@ public class DatastoreUtils {
             return arg0 != null;
           }
         });
-    return DatastoreUtils.queryWithSplitFilters(filtersWithoutNull, 30,
-        new Transformer<Collection<Filter>, PreparedQuery>() {
-          @Override
-          public PreparedQuery transform(final Collection<Filter> arg0) {
-            final Filter filter = CompositeFilterOperator.or(arg0);
-            final Query query = new Query(kindName);
-            query.setFilter(filter);
-            return datastore.prepare(query);
-          }
-        });
+    return query(filtersWithoutNull, multiFilter.getOneTimeCount(),
+        filtersToPreparedQuery(multiFilter.getKindName()));
   }
 
+  private static Transformer<Collection<Filter>, PreparedQuery> filtersToPreparedQuery(
+      final String kindName) {
+    return new Transformer<Collection<Filter>, PreparedQuery>() {
+      @Override
+      public PreparedQuery transform(final Collection<Filter> arg0) {
+        final Filter filter = CompositeFilterOperator.or(arg0);
+        final Query query = new Query(kindName);
+        query.setFilter(filter);
+        return datastore.prepare(query);
+      }
+    };
+  }
 }

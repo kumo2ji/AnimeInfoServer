@@ -45,7 +45,7 @@ public class DatastoreUtilsTest {
       final Collection<AnimeBaseObject> baseList =
           ExternalAnimeInfoUtils.requestAnimeBaseObjects(2014, 2);
       // final Map<String, CoursObject> coursMap = ExternalAnimeInfoUtils.requestCoursObjectMap();
-      final List<Key> keyList = AnimeDatastore.putAnimeBaseObjects(baseList);
+      final List<Key> keyList = AnimeDatastore.create(baseList);
       assertTrue(!keyList.isEmpty());
       final PreparedQuery preparedQuery = AnimeDatastore.query();
       assertThat(baseList.size(),
